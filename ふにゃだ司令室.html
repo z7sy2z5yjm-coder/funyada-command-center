@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ふにゃ田 司令室</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f3ea;color:#28251f;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+main{max-width:760px;margin:auto;padding:24px 16px 60px}h1{font-size:28px;margin:0}.sub{color:#777168;margin:6px 0 22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:#fffdf8;border:1px solid #ded7ca;border-radius:18px;padding:15px}
+.metric small{color:#777168}.metric b{display:block;font-size:25px;margin-top:5px}section{margin-top:24px}.form{display:grid;gap:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}input,button{font:inherit;padding:12px;border-radius:12px;border:1px solid #ded7ca}
+button{background:#28251f;color:white;border:0;font-weight:700}.item{margin-top:9px;background:#fffdf8;border:1px solid #ded7ca;border-radius:14px;padding:13px}
+.meta{font-size:12px;color:#777168}.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;font-size:13px}@media(min-width:620px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body><main>
+<h1>ふにゃ田 司令室 👑</h1><div class="sub">投稿・フォロワー・広告をひとまとめ</div>
+<div class="grid">
+<div class="card metric"><small>現在フォロワー</small><b id="now">—</b></div>
+<div class="card metric"><small>前回から</small><b id="diff">—</b></div>
+<div class="card metric"><small>総広告費</small><b id="ads">¥0</b></div>
+<div class="card metric"><small>1人増あたり</small><b id="cpf">—</b></div>
+</div>
+<section><h2>フォロワーを記録</h2><div class="card form"><div class="row"><input id="fd" type="date"><input id="fc" type="number" placeholder="例：612"></div><button onclick="addF()">記録する</button></div></section>
+<section><h2>投稿を記録</h2><div class="card form"><input id="pt" placeholder="投稿名"><div class="row"><input id="pd" type="date"><input id="pa" type="number" placeholder="広告費 ¥"></div><div class="row"><input id="pl" type="number" placeholder="いいね"><input id="ps" type="number" placeholder="保存"></div><div class="row"><input id="pv" type="number" placeholder="再生数"><input id="pf" type="number" placeholder="増えたフォロワー"></div><button onclick="addP()">投稿を追加</button></div></section>
+<section><h2>投稿一覧</h2><div id="posts"></div></section><section><h2>フォロワー履歴</h2><div id="flist"></div></section>
+</main>
+<script>
+const K="funyada-v1";let d=JSON.parse(localStorage.getItem(K)||'{"followers":[],"posts":[]}');
+const t=new Date().toISOString().slice(0,10);fd.value=t;pd.value=t;
+function save(){localStorage.setItem(K,JSON.stringify(d));render()}
+function yen(n){return"¥"+Math.round(n||0).toLocaleString()}
+function addF(){if(!fd.value||!+fc.value)return alert("日付と人数を入れてね");d.followers.push({date:fd.value,count:+fc.value});d.followers.sort((a,b)=>a.date.localeCompare(b.date));fc.value="";save()}
+function addP(){if(!pt.value.trim())return alert("投稿名を入れてね");d.posts.unshift({title:pt.value.trim(),date:pd.value,ad:+pa.value||0,likes:+pl.value||0,saves:+ps.value||0,views:+pv.value||0,follows:+pf.value||0});[pt,pa,pl,ps,pv,pf].forEach(x=>x.value="");save()}
+function render(){let f=d.followers;now.textContent=f.length?f.at(-1).count.toLocaleString():"—";diff.textContent=f.length>1?((f.at(-1).count-f.at(-2).count)>=0?"+":"")+(f.at(-1).count-f.at(-2).count):"—";let a=d.posts.reduce((s,p)=>s+p.ad,0),g=d.posts.reduce((s,p)=>s+p.follows,0);ads.textContent=yen(a);cpf.textContent=g?yen(a/g):"—";posts.innerHTML=d.posts.length?d.posts.map(p=>'<div class="item"><b>'+p.title+'</b><div class="meta">'+p.date+'</div><div class="stats"><span>♡ '+p.likes+'</span><span>保存 '+p.saves+'</span><span>再生 '+p.views+'</span><span>広告 '+yen(p.ad)+'</span><span>＋'+p.follows+'人</span></div></div>').join(""):'<div class="meta">まだ投稿データはありません。</div>';flist.innerHTML=f.length?[...f].reverse().map(x=>'<div class="item"><b>'+x.count.toLocaleString()+'人</b> <span class="meta">'+x.date+'</span></div>').join(""):'<div class="meta">まだ記録はありません。</div>'}
+render()
+</script>
+</body></html>
